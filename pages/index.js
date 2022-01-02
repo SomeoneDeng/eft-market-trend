@@ -1,16 +1,20 @@
-import { Avatar, Button, Card, Col, Divider, List, Row, Skeleton, Space, Tag } from 'antd'
-import Meta from 'antd/lib/card/Meta'
+import { ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons/lib/icons'
+import { Avatar, Button, Card, Col, List, Row, Tag } from 'antd'
+import ButtonGroup from 'antd/lib/button/button-group'
 import Search from 'antd/lib/input/Search'
 import Layout, { Content, Footer } from 'antd/lib/layout/layout'
-import Item from 'antd/lib/list/Item'
+import Text from 'antd/lib/typography/Text'
 import axios from 'axios'
-import { Component, useState } from 'react'
-import InfiniteScroll from 'react-infinite-scroll-component'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import React, { Component, useEffect } from 'react'
 import MyHeader from '../components/MyHeader'
+
+React.useLayoutEffect = useEffect
 
 const SEARCG_URL = "https://mp.soulofcinder.xyz/eft/api/mainSearch"
 
-export default class Home extends Component {
+class Home extends Component {
 
   constructor(props) {
     super(props)
@@ -112,86 +116,89 @@ export default class Home extends Component {
 
       loading: false,
 
-      page_num: 1,
+      page_num: props.page_num || 1,
       page_size: 30,
-      searchText: '',
-      selectedTag: ''
+      searchText: props.item_name || '',
+      selectedTag: props.tag || ''
     }
   }
 
-  loadMoreData = () => {
+  static async getInitialProps({ query }) {
+    console.log("req--> ", query)
+    var resp = await axios.get(SEARCG_URL
+      + "?tag=" + (query.tag || '')
+      + "&page_num=" + (query.page_num || 1)
+      + "&page_size=" + (query.page_size || 30)
+      + "&item_name=" + (query.item_name || '')
+      + "&sortd=desc&sort=price");
 
-    if (this.state.loading) return
+    return {
+      tag: query.tag,
+      page_num: query.page_num,
+      page_size: query.page_size,
+      item_name: query.item_name,
+      items: resp.data == undefined || resp.data == null ? [] : resp.data
+    };
+  }
 
-    this.setState({loading: true})
-    // const {tags, page_num, page_size, searchText, items} = this.state
+  loadMoreData = (tag) => {
+    if (tag == this.state.selectedTag) {
+      tag = ''
+    }
 
-    console.log(this.state)
+    return "/"
+      + "?tag=" + ((tag != undefined || tag != null) ? tag : this.state.selectedTag)
+      + "&page_num=" + parseInt(this.state.page_num)
+      + "&page_size=" + this.state.page_size
+      + "&item_name=" + this.state.searchText
+      + "&sortd=desc&sort=price"
+  }
 
-    axios.get(SEARCG_URL 
+  loadMoreDataTag = (tag) => {
+    if (tag == this.state.selectedTag) tag = ''
+    return "/"
+      + "?tag=" + tag
+      + "&page_num=" + 1
+      + "&page_size=" + 30
+      + "&item_name=" + this.state.searchText
+      + "&sortd=desc&sort=price"
+  }
+
+  loadNextData = () => {
+    return "/"
       + "?tag=" + this.state.selectedTag
-    + "&page_num=" + this.state.page_num 
-    + "&page_size=" + this.state.page_size 
-    + "&item_name=" + this.state.searchText 
-    + "&sortd=desc&sort=price").then(resp => {
-
-      this.setState({loading: false})
-
-      var t = this.state.items
-
-      if (resp.data == null ||resp.data.length == 0) {
-        this.setState({
-          page_num: 1,
-          items: [],
-          hasMore: false
-        })
-        return
-      }
-
-      resp.data.forEach(i => t.push(i))
-
-      this.setState({
-        // page_num: this.state.page_num + 1,
-        items: t,
-        hasMore: resp.data.length === this.state.page_size
-      })
-    })
+      + "&page_num=" + (parseInt(this.state.page_num) + 1)
+      + "&page_size=" + this.state.page_size
+      + "&item_name=" + this.state.searchText
+      + "&sortd=desc&sort=price"
   }
-
-  componentDidMount() {
-    this.loadMoreData('')
+  loadPrevData = () => {
+    return "/"
+      + "?tag=" + this.state.selectedTag
+      + "&page_num=" + (this.state.page_num == 1 ? 1 : parseInt(this.state.page_num) - 1)
+      + "&page_size=" + this.state.page_size
+      + "&item_name=" + this.state.searchText
+      + "&sortd=desc&sort=price"
   }
-
-  tagClick = (t) => {
-    var that = this
-    setTimeout(function () {
-      that.setState({page_num: 1, page_size: 30, hasMore: true, items: []})
-      that.setState({selectedTag: t.value == that.state.selectedTag ? '' : t.value})
-      console.log("tag---> ", this.state)
-      that.loadMoreData()
-    }, 0)
-  }
-
 
   render() {
 
-    const {tags, items, hasMore} = this.state
+    const { tags } = this.state
 
     return (
       <Layout>
-        {MyHeader('1')()}
-        <Content style={{ minHeight: '100vh' }}>
+        <MyHeader keys={"1"} />
+        <Content style={{ minHeight: '100vh', marginTop: '4px' }}>
           <Row>
             <Col md={{
-                    span: 12,
-                    offset: 6
-                  }} sm={{
-                    span: 24
-                  }} xs={{
-                    span: 24
-                  }}>
+              span: 12,
+              offset: 6
+            }} sm={{
+              span: 24
+            }} xs={{
+              span: 24
+            }}>
               <Card>
-                {/* <Meta title={"search"}></Meta> */}
                 <Row>
                   <Col md={{
                     span: 18,
@@ -201,13 +208,16 @@ export default class Home extends Component {
                   }} xs={{
                     span: 24
                   }}>
-                    <Search onChange={(a)=> {
+                    <Search defaultValue={this.state.searchText} onChange={(a) => {
                       var that = this
                       setTimeout(function () {
-                        that.setState({searchText: a.target.value, page_num: 1, page_size: 30, hasMore: true, items: []})
-                        that.loadMoreData()
+                        that.setState({ searchText: a.target.value, page_num: 1, page_size: 30, hasMore: true, items: [] })
                       }, 0)
-                    }} size='large' placeholder='ruaruarua~~' width={'60'} enterButton={<Button style={{color: 'white', backgroundColor: 'teal'}} onClick={this.loadMoreData}>搜索</Button>}></Search>
+                    }} size='large' placeholder='ruaruarua~~' width={'60'} enterButton={
+                      <Button color='teal'><a color='teal' href={this.loadMoreData()}>
+                        搜索
+                      </a>  </Button>
+                    }></Search>
                   </Col>
                 </Row>
                 <Row>
@@ -219,12 +229,11 @@ export default class Home extends Component {
                   }} xs={{
                     span: 24
                   }}>
-                    <div style={{ marginTop: '20px' }}>{tags.map(tag => <Tag 
-                      key={tag.name} 
-                      onClick={()=> this.tagClick(tag)} 
-                    color={tag.value === this.state.selectedTag ? 'teal' : 'default'} 
-                    style={{ cursor: 'pointer' }}>
-                      {tag.name}
+                    <div style={{ marginTop: '20px' }}>{tags.map(tag => <Tag
+                      key={tag.name}
+                      color={tag.value === this.state.selectedTag ? 'teal' : 'default'}
+                      style={{ cursor: 'pointer' }}>
+                      <a href={this.loadMoreDataTag(tag.value)}>{tag.name}</a>
                     </Tag>)}
                     </div>
                   </Col>
@@ -238,30 +247,48 @@ export default class Home extends Component {
                   }} xs={{
                     span: 24
                   }}>
-                    <InfiniteScroll
-                    dataLength={items.length}
-                    next={this.loadMoreData}
-                    hasMore={hasMore}
-                    loader={<Skeleton avatar paragraph={{ rows: 1 }} active />}
-                    endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
-                    >
                     <List
-                      
-                      dataSource={items}
+                      split={false}
+                      dataSource={this.props.items}
                       renderItem={item => (
-                        <List.Item key={item.id}>
-                          <List.Item.Meta
-                            avatar={<Avatar src={item.enImg} />}
-                            title={item.cnName}
-                            description={item.cnShortName}
-                          />
-                          <div>
-                            
-                          </div>
+                        <List.Item key={item.id} className='' style={{ backgroundColor: '#fff', cursor: 'pointer', paddingBottom: '0' }}>
+                          <Link href={"/detail?uid=" + item.uid + "&name=" + item.cnName}>
+                          <Card style={{ width: '100%' }} hoverable>
+                            <Layout style={{ backgroundColor: '#fff' }}>
+                              <Row>
+                                <Col span={2}>
+                                  <Avatar src={item.enImg}></Avatar>
+                                </Col>
+                                <Col span={16}>
+                                  <Text strong>{item.cnName}</Text>
+                                </Col>
+                                <Col span={4}><small>{item.cnShortName}  </small></Col>
+                              </Row>
+
+                              <Row>
+                                <Col span={24}>
+                                  <p>价格：{item.price + ' ₽'}</p>
+                                  <p>毛时：{item.priceUpdated}</p>
+                                </Col>
+                                <Col span={24}>
+
+                                </Col>
+                              </Row>
+                            </Layout>
+                          </Card>
+                          </Link>
                         </List.Item>
                       )}
                     />
-                    </InfiniteScroll>
+                  </Col>
+                </Row>
+
+                <Row>
+                  <Col span={24}>
+                    <ButtonGroup style={{ width: '100%', marginTop: '8px' }}>
+                      <Button block><a href={this.loadPrevData()}><ArrowLeftOutlined></ArrowLeftOutlined></a></Button>
+                      <Button block><a href={this.loadNextData()}><ArrowRightOutlined></ArrowRightOutlined></a></Button>
+                    </ButtonGroup>
                   </Col>
                 </Row>
               </Card>
@@ -273,3 +300,11 @@ export default class Home extends Component {
     )
   }
 }
+
+function withRouter(props) {
+  const router = useRouter()
+  console.log(props)
+  return <Home {...props} router={router}></Home>
+}
+
+export default Home

@@ -1,22 +1,23 @@
-import { Col, Row } from "antd";
+import { Card, Col, Row } from "antd";
 import Layout, { Content } from "antd/lib/layout/layout";
+import About from "../components/About";
 import MyHeader from "../components/MyHeader";
 
-export default function Recipes( ) {
+export default function about() {
     return <Layout>
-        <MyHeader keys={"2"}/>
+        <MyHeader keys={"3"} />
         <Content>
             <Row>
-            <Col md={{
+                <Col md={{
                     span: 12,
                     offset: 6
-                  }} sm={{
+                }} sm={{
                     span: 24
-                  }} xs={{
+                }} xs={{
                     span: 24
-                  }}>
-                      recipes
-            </Col>
+                }}>
+                    <About></About>
+                </Col>
             </Row>
         </Content>
     </Layout>
