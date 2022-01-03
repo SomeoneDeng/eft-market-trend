@@ -4,6 +4,7 @@ import { Component } from "react";
 import * as echarts from 'echarts';
 import ReactECharts from 'echarts-for-react';
 import { ArrowLeftOutlined } from "@ant-design/icons/lib/icons";
+import Link from "next/link";
 const TREND_URL = 'https://mp.soulofcinder.xyz/eft/api/itemTrend?uid='
 
 class Detail extends Component {
@@ -91,7 +92,7 @@ class Detail extends Component {
                 span: 24
                 }}>
                 <Card title={this.state.name} style={{minHeight: '100vh'}}
-                    extra={<Button><a href="/"><ArrowLeftOutlined /></a></Button>}
+                    extra={<Link href={"/"}><Button><ArrowLeftOutlined></ArrowLeftOutlined></Button></Link>}
                 >
                     <ReactECharts option={this.state.option}></ReactECharts>
                 </Card>

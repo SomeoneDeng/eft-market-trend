@@ -6,7 +6,6 @@ import Layout, { Content, Footer } from 'antd/lib/layout/layout'
 import Text from 'antd/lib/typography/Text'
 import axios from 'axios'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import React, { Component, useEffect } from 'react'
 import MyHeader from '../components/MyHeader'
 
@@ -124,7 +123,6 @@ class Home extends Component {
   }
 
   static async getInitialProps({ query }) {
-    console.log("req--> ", query)
     var resp = await axios.get(SEARCG_URL
       + "?tag=" + (query.tag || '')
       + "&page_num=" + (query.page_num || 1)
@@ -229,12 +227,16 @@ class Home extends Component {
                   }} xs={{
                     span: 24
                   }}>
-                    <div style={{ marginTop: '20px' }}>{tags.map(tag => <Tag
-                      key={tag.name}
+                    <div style={{ marginTop: '20px' }}>{tags.map(tag => 
+                
+                    <Tag
+                      key={tag.name} 
                       color={tag.value === this.state.selectedTag ? 'teal' : 'default'}
                       style={{ cursor: 'pointer' }}>
                       <a href={this.loadMoreDataTag(tag.value)}>{tag.name}</a>
-                    </Tag>)}
+                    </Tag>
+                 
+                    )}
                     </div>
                   </Col>
                 </Row>
@@ -252,7 +254,7 @@ class Home extends Component {
                       dataSource={this.props.items}
                       renderItem={item => (
                         <List.Item key={item.id} className='' style={{ backgroundColor: '#fff', cursor: 'pointer', paddingBottom: '0' }}>
-                          <Link href={"/detail?uid=" + item.uid + "&name=" + item.cnName}>
+                          <a style={{ width: '100%' }} href={"/detail?uid=" + item.uid + "&name=" + item.cnName}>
                           <Card style={{ width: '100%' }} hoverable>
                             <Layout style={{ backgroundColor: '#fff' }}>
                               <Row>
@@ -276,7 +278,7 @@ class Home extends Component {
                               </Row>
                             </Layout>
                           </Card>
-                          </Link>
+                          </a>
                         </List.Item>
                       )}
                     />
@@ -301,10 +303,5 @@ class Home extends Component {
   }
 }
 
-function withRouter(props) {
-  const router = useRouter()
-  console.log(props)
-  return <Home {...props} router={router}></Home>
-}
 
 export default Home

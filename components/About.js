@@ -1,5 +1,4 @@
 import { Card } from "antd";
-import Meta from "antd/lib/card/Meta";
 
 export default function About() {
     return <Card title="塔科夫价格查询">

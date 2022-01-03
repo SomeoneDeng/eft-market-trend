@@ -1,10 +1,10 @@
 import { Col, Layout, Menu, Row, Space } from "antd";
-import { Head } from "next/document";
 import { Header } from "antd/lib/layout/layout";
 import Router from "next/router";
+import { Component } from "react";
 
 
-class MyHeader extends Head {
+class MyHeader extends Component {
 
   constructor(props) {
     super(props)
