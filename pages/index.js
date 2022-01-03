@@ -7,6 +7,7 @@ import Text from 'antd/lib/typography/Text'
 import axios from 'axios'
 import Link from 'next/link'
 import React, { Component, useEffect } from 'react'
+import IndexItem from '../components/IndexItem'
 import MyHeader from '../components/MyHeader'
 
 React.useLayoutEffect = useEffect
@@ -242,8 +243,8 @@ class Home extends Component {
                 </Row>
                 <Row>
                   <Col md={{
-                    span: 18,
-                    offset: 3
+                    span: 20,
+                    offset: 2
                   }} sm={{
                     span: 24
                   }} xs={{
@@ -255,29 +256,7 @@ class Home extends Component {
                       renderItem={item => (
                         <List.Item key={item.id} className='' style={{ backgroundColor: '#fff', cursor: 'pointer', paddingBottom: '0' }}>
                           <a style={{ width: '100%' }} href={"/detail?uid=" + item.uid + "&name=" + item.cnName}>
-                          <Card style={{ width: '100%' }} hoverable>
-                            <Layout style={{ backgroundColor: '#fff' }}>
-                              <Row>
-                                <Col span={2}>
-                                  <Avatar src={item.enImg}></Avatar>
-                                </Col>
-                                <Col span={16}>
-                                  <Text strong>{item.cnName}</Text>
-                                </Col>
-                                <Col span={4}><small>{item.cnShortName}  </small></Col>
-                              </Row>
-
-                              <Row>
-                                <Col span={24}>
-                                  <p>价格：{item.price + ' ₽'}</p>
-                                  <p>毛时：{item.priceUpdated}</p>
-                                </Col>
-                                <Col span={24}>
-
-                                </Col>
-                              </Row>
-                            </Layout>
-                          </Card>
+                            <IndexItem item={item}></IndexItem>
                           </a>
                         </List.Item>
                       )}
